@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Advisor Chat</title>
+    <style>
+        /* Smooth background gradient */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #2e4dd8, #591c95);
+            background-size: cover;
+        }
+
+        /* Glassmorphism Chat Container */
+        .chat-container {
+            max-width: 800px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+        }
+
+        /* Chat log styling */
+        .chat-log {
+            height: 500px;
+            overflow-y: auto;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Message bubbles */
+        .message {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 70%;
+            word-wrap: break-word;
+            display: inline-block;
+        }
+
+        /* User and advisor message styles */
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .advisor-message {
+            background-color: #f5f5f5;
+            color: black;
+            align-self: flex-start;
+        }
+
+        /* Chat input section */
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <h1>🎓 College Admission Assistant</h1>
+    <div class="chat-log" id="chatLog"></div>
+
+    <form id="chatForm" class="chat-input-container">
+        <input type="text" id="userInput" placeholder="Type your message here..." autocomplete="off">
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+    const chatLog = document.getElementById('chatLog');
+
+    function addMessage(message, isUser) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user-message' : 'advisor-message'}`;
+        messageDiv.textContent = message;
+        chatLog.appendChild(messageDiv);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        addMessage(message, true);
+        userInput.value = '';
+
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+            addMessage(data.response, false);
+        } catch (error) {
+            // Fixed template literal for error message
+            addMessage(`Error: ${error.message}`, false);
+        }
+    });
+</script>
+
+</body>
+</html>
